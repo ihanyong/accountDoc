@@ -1,0 +1,11 @@
+@startuml
+User -> (register)
+note left of User
+ 商户系统/骑手系统的用户
+ 可以是一人
+end note
+User --> (updateInfo/resetPwd)
+User ---> (pay/payConfirm)
+User ---> (fine)
+User ----> (subsidy)
+@enduml

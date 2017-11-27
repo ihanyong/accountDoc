@@ -1,0 +1,99 @@
+@startuml
+title 余额支付时序图
+actor user
+
+== order ==
+user -> merchant: order
+merchant -> account : pay order
+account -> merchant : 支付结果
+
+== pay result notify ==
+account --> merchant : 支结果异步通知
+note right : 将支付结果异步通知调用的业务系统
+@enduml
+
+
+
+
+@startuml
+title 三方支付时序图
+
+actor user
+
+== order ==
+user -> orderSys: order
+orderSys -> account: pay order
+account -> orderSys : return invoke info
+orderSys -> user : return the invoke info
+
+== invoke third pay ==
+user -> thirdPaySystem: invoke the pay
+thirdPaySystem -> user: return the pay result
+user -> orderSys: query the pay result
+orderSys -> account : query the pay result
+opt if the notify has not arrived
+account -> thirdPaySystem : query the pay result
+end
+thirdPaySystem -> account : return the pay result
+note left: update the status of the account
+account -> orderSys: response the pay result
+
+...
+== pay result notify ==
+thirdPaySystem --> account
+account --> orderSys
+@enduml
+
+
+@startuml
+title 余额支付退款时序图
+participant orderSystem as order
+note left of order : eg. merchant or rider...
+
+order -> account : cancel/refund
+account -> order : return the process result
+
+...
+account --> order : notify the refund result
+@enduml
+
+@startuml
+title 三方支付取消/退款时序图
+
+participant orderSystem as order
+participant accountSystem as account
+participant thirdPaySystem as third
+note left of order : eg. merchant or rider...
+
+order -> account : cancel/refund
+alt paid case
+    account -> third: cancel and close the pay order;
+    account -> account : close the pay order
+    account -> order: return the result
+else not paid
+    account -> third: invoke refund
+    third -> account: response the invoke status
+    account -> order : response
+    ...
+    third --> account : notify the refund result
+    account --> order: the refund result
+end
+
+...
+account --> order: notify the pay order status
+@enduml
+
+@startuml
+title (任务完成)结算时序图
+
+participant orderSystem as order
+participant account
+
+order -> account: invoke settle
+account -> order : response the accept status
+
+...
+account -> account : process the settle request
+account --> order : notify the process result
+
+@enduml

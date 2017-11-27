@@ -1,0 +1,26 @@
+@startuml
+[*] --> paying: 三方支付
+[*] --> paid : 余额支付
+paying --> paid : 三方支付成功
+paying --> close: close
+paid --> refund : refund
+
+state refund {
+[*]-->refunding:三方支付退款
+[*]--> refunded:余额支付退款
+refunding-->refunded:三方退款成功
+refunding --> refundfail : 三方退款失败
+refundfail:三方退款失败怎么处理？
+refunded --> [*]
+}
+
+state close {
+[*]->closing
+closing --> closed:success
+closing-->closefail:fail or paid
+
+closefail -> WhatTODO
+closefail --> refund: if paid
+}
+
+@enduml

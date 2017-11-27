@@ -1,0 +1,73 @@
+@startuml
+title 1-0 支付流程
+start
+:check input;
+note
+params:
+
+end note
+
+
+split
+partition 余额支付{
+:lock all account to update;
+:discount the amount from pay account;
+if (discount success) then (yes)
+:insert ops record of pay account;
+:insert record of pay account;
+:insert record of account;
+endif
+}
+
+
+
+split again
+partition 三方支付{
+: check the params depends on the pay channel;
+: insert the ops of pay account ;
+: gen the pay request depends on the pay channel;
+: insert the pay request depends on the apy channel;
+}
+end split
+
+:return back the info of pay;
+stop
+@enduml
+
+
+
+
+@startuml
+title 1-1 三方支付通知
+start
+:check input;
+if (paid success) then (yes)
+:update the record of pay request to paid;
+else (no)
+:update the record of pay request to fail;
+endif
+
+end
+@enduml
+
+
+@startuml
+title 1-1 退款/关闭支付
+start
+
+:check input;
+
+split
+partition 余额支付 {
+}
+
+
+
+split again
+partition 三方支付{
+}
+end split
+
+
+end
+@enduml
